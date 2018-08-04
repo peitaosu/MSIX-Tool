@@ -1,0 +1,19 @@
+# Visual Studio Code Configuration Files
+.vscode/
+
+# Visual Studio Configuration Files
+.vs/
+
+# C# Project Profile
+*.csproj.user
+
+# Build
+bin/
+obj/
+packages/
+
+# Binaries
+*.dll
+*.lib
+*.pdb
+*.exe
