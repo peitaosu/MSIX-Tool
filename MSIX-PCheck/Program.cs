@@ -15,25 +15,21 @@ namespace MSIX_PCheck
         {
             while(true){
                 string input = Console.ReadLine();
-                if(input.StartsWith("exit")){
+                string[] command = input.Split('|');
+                if(command[0] == "exit")
                     break;
-                }
-                else
-                {
-                    string[] command = input.Split('|');
-                    switch(command[0]){
-                        case "file":
-                            file(command);
-                            break;
-                        case "reg":
-                            reg(command);
-                            break;
-                        case "info":
-                            info();
-                            break;
-                        default:
-                            break;
-                    }
+                switch(command[0]){
+                    case "file":
+                        file(command);
+                        break;
+                    case "reg":
+                        reg(command);
+                        break;
+                    case "info":
+                        info();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
