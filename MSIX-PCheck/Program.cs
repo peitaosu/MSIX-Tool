@@ -14,22 +14,27 @@ namespace MSIX_PCheck
         static void Main(string[] args)
         {
             while(true){
-                string input = Console.ReadLine();
-                string[] command = input.Split('|');
-                if(command[0] == "exit")
-                    break;
-                switch(command[0]){
-                    case "file":
-                        file(command);
+                try{
+                    string input = Console.ReadLine();
+                    string[] command = input.Split('|');
+                    if(command[0] == "exit")
                         break;
-                    case "reg":
-                        reg(command);
-                        break;
-                    case "info":
-                        info();
-                        break;
-                    default:
-                        break;
+                    switch(command[0]){
+                        case "file":
+                            file(command);
+                            break;
+                        case "reg":
+                            reg(command);
+                            break;
+                        case "info":
+                            info();
+                            break;
+                        default:
+                            break;
+                    }
+                }catch(Exception e)
+                {
+                    Console.WriteLine("[ERROR] {0}", e.Message);
                 }
             }
         }
