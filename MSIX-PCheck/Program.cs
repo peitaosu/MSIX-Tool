@@ -41,7 +41,7 @@ namespace MSIX_PCheck
 
         static void info()
         {
-            Console.WriteLine(@"file|exec\read\new\del|path");
+            Console.WriteLine(@"file|exec\read\new\del\write|path");
             Console.WriteLine(@"reg|get\set|key|value|data");
         }
 
@@ -75,11 +75,10 @@ namespace MSIX_PCheck
                     Console.WriteLine("File {0} Delete Status {1}", path, deleted);
                     break;
                 case "write":
-                    StreamWriter sw = File.AppendText(path);
                     string test = Guid.NewGuid().ToString();
-                    sw.WriteLine(test);
+                    File.AppendAllText(path, test);
                     bool appended = false;
-                    if(File.ReadLines(path).Last() == test)
+                    if(File.ReadAllText(path).EndsWith(test))
                     {
                         appended = true;
                     }
