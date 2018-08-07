@@ -75,6 +75,10 @@ namespace MSIX_PCheck
                     Console.WriteLine("File {0} Delete Status {1}", path, deleted);
                     break;
                 case "write":
+                    if (!File.Exists(path))
+                    {
+                        throw new FileNotFoundException();
+                    }
                     string test = Guid.NewGuid().ToString();
                     File.AppendAllText(path, test);
                     bool appended = false;
