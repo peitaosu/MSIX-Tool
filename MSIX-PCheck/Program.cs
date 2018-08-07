@@ -41,7 +41,7 @@ namespace MSIX_PCheck
 
         static void info()
         {
-            Console.WriteLine(@"file|exec\read\new\del\write|path");
+            Console.WriteLine(@"file|exec\read\new\delete\write|path");
             Console.WriteLine(@"reg|get\set|root|key|value|data");
         }
 
@@ -66,7 +66,11 @@ namespace MSIX_PCheck
                     }
                     Console.WriteLine("File {0} Create Status {1}", path, added);
                     break;
-                case "del":
+                case "delete":
+                    if (!File.Exists(path))
+                    {
+                        throw new FileNotFoundException();
+                    }
                     File.Delete(path);
                     bool deleted = false;
                     if(!File.Exists(path)){
