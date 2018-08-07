@@ -42,7 +42,7 @@ namespace MSIX_PCheck
         static void info()
         {
             Console.WriteLine(@"file|exec\read\new\del\write|path");
-            Console.WriteLine(@"reg|get\set|key|value|data");
+            Console.WriteLine(@"reg|get\set|root|key|value|data");
         }
 
         static void file(string[] args){
@@ -91,16 +91,33 @@ namespace MSIX_PCheck
 
         static void reg(string[] args){
             string operation = args[1];
-            string reg_key = args[2];
-            string reg_value = args[3];
-            string reg_data = args[4];
+            string reg_root = args[2];
+            string reg_key = args[3];
+            string reg_value = args[4];
+            string reg_data = args[5];
+
+            RegistryKey root;
+            switch (reg_root)
+            {
+                case "HKEY_LOCAL_MACHINE":
+                    root = Registry.LocalMachine;
+                    break;
+                case "HKEY_CURRENT_USER":
+                    root = Registry.CurrentUser;
+                    break;
+                default:
+                    root = Registry.CurrentUser;
+                    break;
+            }
             switch(operation){
                 case "get":
-                    var result = Registry.GetValue(reg_key, reg_value, null);
+                    RegistryKey get_key = root.OpenSubKey(reg_key, false);
+                    var result = get_key.GetValue(reg_value);
                     Console.WriteLine("Reg {0} {1} Get {2}", reg_key, reg_value, result);
                     break;
                 case "set":
-                    Registry.SetValue(reg_key, reg_value, reg_data);
+                    RegistryKey set_key = root.OpenSubKey(reg_key, true);
+                    set_key.SetValue(reg_value, reg_data);
                     Console.WriteLine("Reg {0} {1} Set {2}", reg_key, reg_value, reg_data);
                     break;
                 default:
