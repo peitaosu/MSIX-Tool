@@ -113,6 +113,15 @@ namespace MSIX_PCheck
                 case "HKEY_CURRENT_USER":
                     root = Registry.CurrentUser;
                     break;
+                case "HKEY_CLASSES_ROOT":
+                    root = Registry.ClassesRoot;
+                    break;
+                case "HKEY_USERS":
+                    root = Registry.Users;
+                    break;
+                case "HKEY_CURRENT_CONFIG":
+                    root = Registry.CurrentConfig;
+                    break;
                 default:
                     root = Registry.CurrentUser;
                     break;
