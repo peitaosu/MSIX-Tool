@@ -62,6 +62,8 @@ namespace MSIX_PCheck
         {
             Console.WriteLine(@"file|exec\read\new\delete\write|path");
             Console.WriteLine(@"reg|get\set\new\delete|root|key|value|data");
+            Console.WriteLine(@"debug");
+            Console.WriteLine(@"test");
         }
 
         static void debug(string log)
