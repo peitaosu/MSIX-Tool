@@ -11,6 +11,8 @@ namespace MSIX_PCheck
 {
     class Program
     {
+        static bool is_debug = false;
+
         static void Main(string[] args)
         {
             while(true){
@@ -29,6 +31,9 @@ namespace MSIX_PCheck
                         case "info":
                             info();
                             break;
+                        case "debug":
+                            is_debug = true;
+                            break;
                         default:
                             break;
                     }
@@ -45,6 +50,14 @@ namespace MSIX_PCheck
             Console.WriteLine(@"reg|get\set|root|key|value|data");
         }
 
+        static void debug(string log)
+        {
+            if (is_debug)
+            {
+                Console.WriteLine(log);
+            }
+        }
+
         static void file(string[] args){
             string operation = args[1];
             string path = args[2];
@@ -52,11 +65,11 @@ namespace MSIX_PCheck
                 case "exec":
                     Process process = Process.Start(path);
                     process.WaitForExit();
-                    Console.WriteLine("Process {0} Exit Code {1}", path, process.ExitCode);
+                    debug(string.Format("Process {0} Exit Code {1}", path, process.ExitCode));
                     break;
                 case "read":
                     string text = File.ReadAllText(path);
-                    Console.WriteLine("File {0} Text Content {1}", path, text);
+                    debug(string.Format("File {0} Text Content {1}", path, text));
                     break;
                 case "new":
                     File.Create(path).Dispose();
@@ -64,7 +77,7 @@ namespace MSIX_PCheck
                     if(File.Exists(path)){
                         added = true;
                     }
-                    Console.WriteLine("File {0} Create Status {1}", path, added);
+                    debug(string.Format("File {0} Create Status {1}", path, added));
                     break;
                 case "delete":
                     if (!File.Exists(path))
@@ -76,7 +89,7 @@ namespace MSIX_PCheck
                     if(!File.Exists(path)){
                         deleted = true;
                     }
-                    Console.WriteLine("File {0} Delete Status {1}", path, deleted);
+                    debug(string.Format("File {0} Delete Status {1}", path, deleted));
                     break;
                 case "write":
                     if (!File.Exists(path))
@@ -90,7 +103,7 @@ namespace MSIX_PCheck
                     {
                         appended = true;
                     }
-                    Console.WriteLine("File {0} Write Status {1}", path, appended);
+                    debug(string.Format("File {0} Write Status {1}", path, appended));
                     break;
                 default:
                     break;
@@ -130,12 +143,12 @@ namespace MSIX_PCheck
                 case "get":
                     RegistryKey get_key = root.OpenSubKey(reg_key, false);
                     var result = get_key.GetValue(reg_value);
-                    Console.WriteLine("Reg {0} {1} Get {2}", reg_key, reg_value, result);
+                    debug(string.Format(@"Reg {0}\{1} {2} Get {3}", reg_root, reg_key, reg_value, result));
                     break;
                 case "set":
                     RegistryKey set_key = root.OpenSubKey(reg_key, true);
                     set_key.SetValue(reg_value, reg_data);
-                    Console.WriteLine("Reg {0} {1} Set {2}", reg_key, reg_value, reg_data);
+                    debug(string.Format(@"Reg {0}\{1} {2} Set {3}", reg_root, reg_key, reg_value, reg_data));
                     break;
                 default:
                     break;
