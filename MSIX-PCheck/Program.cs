@@ -6,12 +6,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Win32;
+using System.Security;
+using System.Security.Permissions;
 
 namespace MSIX_PCheck
 {
     class Program
     {
         static bool is_debug = false;
+        static string file_placeholder_txt = @"_placeholder_.txt";
+        static string file_new_txt = @"_test_.txt";
+        static string reg_key = @"Software\MSIX-Tool\TestKey";
+        static string reg_value = @"TestValue";
+        static string reg_data = @"TestData";
+        static string reg_key_new = @"Software\MSIX-New";
+        static string reg_value_new = @"NewValue";
+        static string reg_data_new = @"NewData";
+        static string exec_file = @"VFS\ProgramFilesX64\MSIX-PCheck.exe";
 
         static void Main(string[] args)
         {
@@ -28,6 +39,9 @@ namespace MSIX_PCheck
                         case "reg":
                             reg(command);
                             break;
+                        case "test":
+                            test(command);
+                            break;
                         case "info":
                             info();
                             break;
@@ -39,7 +53,7 @@ namespace MSIX_PCheck
                     }
                 }catch(Exception e)
                 {
-                    Console.WriteLine("[ERROR] {0}", e.Message);
+                    Console.WriteLine("[ERROR] {0} {1}", e.GetType().Name, e.Message);
                 }
             }
         }
@@ -176,6 +190,198 @@ namespace MSIX_PCheck
                     break;
                 default:
                     break;
+            }
+        }
+
+        static void test(string[] args)
+        {
+
+            Dictionary<string, string> vfs_paths = new Dictionary<string, string>();
+            vfs_paths.Add("AppData", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+            vfs_paths.Add("LocalAppData", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+            vfs_paths.Add("CommonAppData", Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+            vfs_paths.Add("CommonDesktop", Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory));
+            vfs_paths.Add("CommonDocuments", Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments));
+            vfs_paths.Add("CommonPrograms", Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms));
+            vfs_paths.Add("Fonts", Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
+            vfs_paths.Add("CommonProgramFiles", Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles));
+            vfs_paths.Add("CommonProgramFilesX86", Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86));
+            vfs_paths.Add("ProgramFiles", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+            vfs_paths.Add("ProgramFilesX86", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
+            vfs_paths.Add("System", Environment.GetFolderPath(Environment.SpecialFolder.System));
+            vfs_paths.Add("Windows", Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+
+            Dictionary<string, Dictionary<string, string>> result = new Dictionary<string, Dictionary<string, string>>();
+            Dictionary<string, string> ops;
+            string status;
+
+            foreach (var vfs_path in vfs_paths)
+            {
+                ops = new Dictionary<string, string>();
+                status = "None";
+                try
+                {
+                    string path = Path.Combine(vfs_path.Value, file_placeholder_txt);
+                    file(new string[] { "file", "read", path });
+                    status = "Success";
+                }
+                catch (FileNotFoundException e)
+                {
+                    status = "File Not Found";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                ops.Add("Read", status);
+                Console.WriteLine("{0} : {1} : {2}", vfs_path.Key, "Read", status);
+
+                try
+                {
+                    string path = Path.Combine(vfs_path.Value, file_placeholder_txt);
+                    file(new string[] { "file", "write", path });
+                    status = "Success";
+                }
+                catch (FileNotFoundException e)
+                {
+                    status = "File Not Found";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                ops.Add("Write", status);
+                Console.WriteLine("{0} : {1} : {2}", vfs_path.Key, "Write", status);
+
+                try
+                {
+                    string path = Path.Combine(vfs_path.Value, file_new_txt);
+                    file(new string[] { "file", "new", path });
+                    status = "Success";
+                }
+                catch (FileNotFoundException e)
+                {
+                    status = "File Not Found";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                ops.Add("New", status);
+                Console.WriteLine("{0} : {1} : {2}", vfs_path.Key, "New", status);
+
+                try
+                {
+                    string path = Path.Combine(vfs_path.Value, file_new_txt);
+                    file(new string[] { "file", "delete", path });
+                    status = "Success";
+                }
+                catch (FileNotFoundException e)
+                {
+                    status = "File Not Found";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                ops.Add("Delete", status);
+                Console.WriteLine("{0} : {1} : {2}", vfs_path.Key, "Delete", status);
+
+                result.Add(vfs_path.Key, ops);
+            }
+
+            foreach (string reg_root in new string[] { "HKEY_CURRENT_USER", "HKEY_LOCAL_MACHINE" })
+            {
+
+                ops = new Dictionary<string, string>();
+
+                status = "None";
+                try
+                {
+                    reg(new string[] { "reg", "get", reg_root, reg_key, reg_value, reg_data });
+                    status = "Success";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                catch (NullReferenceException e)
+                {
+                    status = "Null Reference";
+                }
+                catch (SecurityException e)
+                {
+                    status = "Security";
+                }
+                ops.Add("Get", status);
+                Console.WriteLine("{0} : {1} : {2}", reg_root, "Get", status);
+
+                status = "None";
+                try
+                {
+                    reg(new string[] { "reg", "set", reg_root, reg_key, reg_value, reg_data_new });
+                    status = "Success";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                catch (NullReferenceException e)
+                {
+                    status = "Null Reference";
+                }
+                catch (SecurityException e)
+                {
+                    status = "Security";
+                }
+                ops.Add("Set", status);
+                Console.WriteLine("{0} : {1} : {2}", reg_root, "Set", status);
+
+                status = "None";
+                try
+                {
+                    reg(new string[] { "reg", "new", reg_root, reg_key_new, "", "" });
+                    reg(new string[] { "reg", "new", reg_root, reg_key_new, reg_value_new, reg_value_new });
+                    status = "Success";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                catch (NullReferenceException e)
+                {
+                    status = "Null Reference";
+                }
+                catch (SecurityException e)
+                {
+                    status = "Security";
+                }
+                ops.Add("New", status);
+                Console.WriteLine("{0} : {1} : {2}", reg_root, "New", status);
+
+                status = "None";
+                try
+                {
+                    reg(new string[] { "reg", "delete", reg_root, reg_key_new, reg_value_new, reg_value_new });
+                    reg(new string[] { "reg", "delete", reg_root, reg_key_new, "", "" });
+                    status = "Success";
+                }
+                catch (UnauthorizedAccessException e)
+                {
+                    status = "Access Denied";
+                }
+                catch (NullReferenceException e)
+                {
+                    status = "Null Reference";
+                }
+                catch (SecurityException e)
+                {
+                    status = "Security";
+                }
+                ops.Add("Delete", status);
+                Console.WriteLine("{0} : {1} : {2}", reg_root, "Delete", status);
+
+                result.Add(reg_root, ops);
             }
         }
     }
