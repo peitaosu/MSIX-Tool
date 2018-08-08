@@ -47,7 +47,7 @@ namespace MSIX_PCheck
         static void info()
         {
             Console.WriteLine(@"file|exec\read\new\delete\write|path");
-            Console.WriteLine(@"reg|get\set|root|key|value|data");
+            Console.WriteLine(@"reg|get\set\new\delete|root|key|value|data");
         }
 
         static void debug(string log)
@@ -149,6 +149,30 @@ namespace MSIX_PCheck
                     RegistryKey set_key = root.OpenSubKey(reg_key, true);
                     set_key.SetValue(reg_value, reg_data);
                     debug(string.Format(@"Reg {0}\{1} {2} Set {3}", reg_root, reg_key, reg_value, reg_data));
+                    break;
+                case "new":
+                    if (reg_value != "")
+                    {
+                        RegistryKey new_key = root.OpenSubKey(reg_key, true);
+                        new_key.SetValue(reg_value, reg_data);
+                    }
+                    else
+                    {
+                        RegistryKey new_key = root.CreateSubKey(reg_key);
+                    }
+                    debug(string.Format(@"Reg New {0}\{1} {2} {3}", reg_root, reg_key, reg_value, reg_data));
+                    break;
+                case "delete":
+                    if (reg_value != "")
+                    {
+                        RegistryKey del_key = root.OpenSubKey(reg_key, true);
+                        del_key.DeleteValue(reg_value);
+                    }
+                    else
+                    {
+                        root.DeleteSubKey(reg_key);
+                    }
+                    debug(string.Format(@"Reg Delete {0}\{1} {2} {3}", reg_root, reg_key, reg_value, reg_data));
                     break;
                 default:
                     break;
