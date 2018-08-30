@@ -60,7 +60,7 @@ namespace MSIX_PCheck
 
         static void info()
         {
-            Console.WriteLine(@"file|exec\read\new\delete\write|path");
+            Console.WriteLine(@"file|exec\read\new\delete\write\load|path");
             Console.WriteLine(@"reg|get\set\new\delete|root|key|value|data");
             Console.WriteLine(@"debug");
             Console.WriteLine(@"test");
@@ -120,6 +120,12 @@ namespace MSIX_PCheck
                         appended = true;
                     }
                     debug(string.Format("File {0} Write Status {1}", path, appended));
+                    break;
+                case "load":
+                    bool loaded = false;
+                    IntPtr module = LoadLibraryEx(path, IntPtr.Zero, 0);
+                    loaded = true;
+                    debug(string.Format("File {0} Load Status {1}", path, loaded));
                     break;
                 default:
                     break;
@@ -386,5 +392,8 @@ namespace MSIX_PCheck
                 result.Add(reg_root, ops);
             }
         }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
     }
 }
