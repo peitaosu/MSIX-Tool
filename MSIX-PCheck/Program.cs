@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using System.Security;
 using System.Security.Permissions;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace MSIX_PCheck
 {
@@ -124,6 +126,10 @@ namespace MSIX_PCheck
                 case "load":
                     bool loaded = false;
                     IntPtr module = LoadLibraryEx(path, IntPtr.Zero, 0);
+                    if (module == IntPtr.Zero)
+                    {
+                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                    }
                     loaded = true;
                     debug(string.Format("File {0} Load Status {1}", path, loaded));
                     break;
@@ -393,7 +399,7 @@ namespace MSIX_PCheck
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
     }
 }
