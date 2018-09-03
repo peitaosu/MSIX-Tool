@@ -62,7 +62,7 @@ namespace MSIX_PCheck
 
         static void info()
         {
-            Console.WriteLine(@"file|exec\read\new\delete\write\load|path");
+            Console.WriteLine(@"file|exec\bg\read\new\delete\write\load|path");
             Console.WriteLine(@"reg|get\set\new\delete|root|key|value|data");
             Console.WriteLine(@"debug");
             Console.WriteLine(@"test");
@@ -79,14 +79,24 @@ namespace MSIX_PCheck
         static void file(string[] args){
             string operation = args[1];
             string path = args[2];
-            switch(operation){
+            Process process;
+            switch (operation){
                 case "exec":
-                    Process process = new Process();
+                    process = new Process();
                     process.StartInfo.FileName = path.Substring(0, path.IndexOf(".exe") + 4);
                     process.StartInfo.Arguments = path.Substring(path.IndexOf(".exe") + 4);
                     process.Start();
                     process.WaitForExit();
                     debug(string.Format("Process {0} Exit Code {1}", path, process.ExitCode));
+                    break;
+                case "bg":
+                    process = new Process();
+                    process.StartInfo.FileName = path.Substring(0, path.IndexOf(".exe") + 4);
+                    process.StartInfo.Arguments = path.Substring(path.IndexOf(".exe") + 4);
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.UseShellExecute = false;
+                    process.Start();
+                    debug(string.Format("Process {0} In Background", path));
                     break;
                 case "read":
                     string text = File.ReadAllText(path);
