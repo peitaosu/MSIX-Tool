@@ -81,7 +81,10 @@ namespace MSIX_PCheck
             string path = args[2];
             switch(operation){
                 case "exec":
-                    Process process = Process.Start(path);
+                    Process process = new Process();
+                    process.StartInfo.FileName = path.Substring(0, path.IndexOf(".exe") + 4);
+                    process.StartInfo.Arguments = path.Substring(path.IndexOf(".exe") + 4);
+                    process.Start();
                     process.WaitForExit();
                     debug(string.Format("Process {0} Exit Code {1}", path, process.ExitCode));
                     break;
