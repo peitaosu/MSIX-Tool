@@ -77,7 +77,7 @@ namespace MSIX_PCheck
         }
 
         static void file(string[] args){
-            string operation = args[1];
+            string operation = args[1].ToLower();
             string path = args[2];
             Process process;
             switch (operation){
@@ -152,8 +152,8 @@ namespace MSIX_PCheck
         }
 
         static void reg(string[] args){
-            string operation = args[1];
-            string reg_root = args[2];
+            string operation = args[1].ToLower();
+            string reg_root = args[2].ToUpper();
             string reg_key = args[3];
             string reg_value = args[4];
             string reg_data = args[5];
