@@ -8,14 +8,13 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using System.Security;
 using System.Security.Permissions;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 
 namespace MSIX_PCheck
 {
     class Program
     {
         static bool is_debug = false;
+        static bool is_bg = false;
         static string file_placeholder_txt = @"_placeholder_.txt";
         static string file_new_txt = @"_test_.txt";
         static string reg_key = @"Software\MSIX-Tool\TestKey";
@@ -50,6 +49,9 @@ namespace MSIX_PCheck
                         case "debug":
                             is_debug = true;
                             break;
+                        case "bg":
+                            is_bg = true;
+                            break;
                         default:
                             break;
                     }
@@ -62,8 +64,9 @@ namespace MSIX_PCheck
 
         static void info()
         {
-            Console.WriteLine(@"file|exec\bg\read\new\delete\write\load|path");
+            Console.WriteLine(@"file|exec\read\new\delete\write\load|path");
             Console.WriteLine(@"reg|get\set\new\delete|root|key|value|data");
+            Console.WriteLine(@"bg");
             Console.WriteLine(@"debug");
             Console.WriteLine(@"test");
         }
@@ -79,24 +82,29 @@ namespace MSIX_PCheck
         static void file(string[] args){
             string operation = args[1].ToLower();
             string path = args[2];
-            Process process;
-            switch (operation){
+            switch(operation){
                 case "exec":
-                    process = new Process();
+                    Process process = new Process();
                     process.StartInfo.FileName = path.Substring(0, path.IndexOf(".exe") + 4);
-                    process.StartInfo.Arguments = path.Substring(path.IndexOf(".exe") + 4);
+                    if (path.Split(' ').Length > 1)
+                    {
+                        process.StartInfo.Arguments = path.Substring(process.StartInfo.FileName.Length);
+                    }
+                    if (is_bg)
+                    {
+                        process.StartInfo.UseShellExecute = false;
+                        process.StartInfo.CreateNoWindow = true;
+                    }
                     process.Start();
-                    process.WaitForExit();
-                    debug(string.Format("Process {0} Exit Code {1}", path, process.ExitCode));
-                    break;
-                case "bg":
-                    process = new Process();
-                    process.StartInfo.FileName = path.Substring(0, path.IndexOf(".exe") + 4);
-                    process.StartInfo.Arguments = path.Substring(path.IndexOf(".exe") + 4);
-                    process.StartInfo.CreateNoWindow = true;
-                    process.StartInfo.UseShellExecute = false;
-                    process.Start();
-                    debug(string.Format("Process {0} In Background", path));
+                    if (is_bg)
+                    {
+                        debug(string.Format("Process {0}", path));
+                    }
+                    else
+                    {
+                        process.WaitForExit();
+                        debug(string.Format("Process {0} Exit Code {1}", path, process.ExitCode));
+                    }
                     break;
                 case "read":
                     string text = File.ReadAllText(path);
@@ -139,10 +147,6 @@ namespace MSIX_PCheck
                 case "load":
                     bool loaded = false;
                     IntPtr module = LoadLibraryEx(path, IntPtr.Zero, 0);
-                    if (module == IntPtr.Zero)
-                    {
-                        throw new Win32Exception(Marshal.GetLastWin32Error());
-                    }
                     loaded = true;
                     debug(string.Format("File {0} Load Status {1}", path, loaded));
                     break;
@@ -412,7 +416,7 @@ namespace MSIX_PCheck
             }
         }
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
     }
 }
