@@ -1,0 +1,3 @@
+[submodule "Reg_Hive"]
+	path = Reg_Hive
+	url = https://github.com/peitaosu/Reg_Hive.git
